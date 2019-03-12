@@ -9,16 +9,14 @@
 % OUTPUT:
 %      -- B      , the first matrix of the non linear system
 function B = ConstructB(Iu, Iv, tau_x ,tau_y)
-[~,m] = size(tau_x);
-[w,h] = size(Iu);
-B1 = zeros(w,h,m);
-for i = 1:m
-    B1(:,:,m) = Iu.*tau_x(i)+Iv.*tau_y(i);
-end
-
-B = zeros(w,h,m,3);
-for i = 1:w
-    for j = 1:h
-        B(i,j,m,3) = [B1(i,j,:) tau_x tau_y];
+[m,~] = size(tau_x);
+[w,h,c] = size(Iu);
+B1 = zeros(w,h,c,m);
+for k = 1:c
+    for i = 1:m
+        B1(:,:,k,i) = Iu(:,:,k).*tau_x(i)+Iv(:,:,k).*tau_y(i);
     end
 end
+B.B1 = B1;
+B.B2 = tau_x;
+B.B3 = tau_y;

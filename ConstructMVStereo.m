@@ -2,37 +2,40 @@
 % This funtion is used to constrcut the multi-view camera stereo by the
 % light field image.
 % INPUT:
-%      -- SubAperSet    , the sub aperture image also the multiview image.
+%      -- MVImgSet      , the multiview image set
 %      -- opt           , the option parameter of the differential computation
 % OUTPUT:
 %      -- B             , the first matrix of the non linear ssytem
 %      -- DeltaI        , the martix of the differential stereo of multi cameras
 %      -- Iu            , the horizental direction of spatial derivatives
 %      -- Iv            , the vertical direction of spatial derivatives
-function [B, DeltaI, MVImg, Iu, Iv] = ConstructMVStereo(SubAperSet,opt)
+function [B, DeltaI, Iu, Iv] = ConstructMVStereo(MVImgSet, LF_Para, opt)
+x_size =  LF_Para.x_size;
+y_size =  LF_Para.y_size;
+color_channel = LF_Para.color_channel;
 
 % Set the central view camera as the target
-cam_index_center_w = opt.Cam_Index_Center(1);
-cam_index_center_h = opt.Cam_Index_Center(2);
-Cam0 = SubAperSet{cam_index_center};
 
-cam_num_w = opt.Cam_With;
-cam_num_h = opt.Cam_Height;
+w = opt.Cam_With;
+h = opt.Cam_Height;
+cen_x = round(w/2);
+cen_y = round(h/2);
+Cam0 = MVImgSet{cen_y,cen_x};
 
 % compute difference between the cameras
-m = cam_num_w*cam_num_h;
-tau_x = zeros(1,m);
-tau_y = zeros(1,m);
+m = w*h;
+tau_x = zeros(m,1);
+tau_y = zeros(m,1);
 
 % compute the differential
-DeltaI = cell(1,m);
+DeltaI = zeros(x_size, y_size, color_channel, m);
 count = 1;
-for i = cam_index_center_w - fix(cam_num_w/2) : cam_index_center_w + fix(cam_num_w/2)
-    for j = cam_index_center_h - fix(cam_num_h/2) : cam_index_center_h + fix(cam_num_h/2)
-        Cam1 = SubAperSet{i,j};
-        tau_x(count)    = j;
-        tau_y(count)    = i;    
-        DeltaI{count}   = Cam0 - Cam1;
+for i = 1 : h
+    for j = 1 : w
+        Cam1 = MVImgSet{i,j};
+        tau_x(count)    = j - cen_x;
+        tau_y(count)    = i - cen_y;    
+        DeltaI(:,:,:,count)   = Cam0 - Cam1;
         count = count+1;
     end
 end
@@ -40,7 +43,7 @@ end
 middle_index = round(m/2);
 tau_x(middle_index) =[];
 tau_y(middle_index) =[];
-DeltaI{middle_index}=[];
+DeltaI(:,:,:,middle_index)=[];
 
 % compute the spatial derivative of Image of central camera
 [Iu, Iv] = ComputeSpatialDerivate(Cam0,opt);

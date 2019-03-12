@@ -6,16 +6,29 @@
 %         SubAperImg,   ,a whole image for all subaperture image.
 
 function [SubAperSet, SubAperImg] = LF2SubAperture(LF, LF_Para)
-UV_diameter = LF_Para.UV_diameter;
-
-SubAperSet = cell(UV_diameter,UV_diameter);
-for i = 1:UV_diameter
-    for j = 1:UV_diameter
-        SubAperSet{i,j} = LF(i:UV_diameter:end,j:UV_diameter:end,:);
-    end
+switch LF_Para.CamType
+    case 0
+        UV_diameter = LF_Para.UV_diameter;
+        SubAperSet = cell(UV_diameter,UV_diameter);
+        for i = 1:UV_diameter
+            for j = 1:UV_diameter
+                SubAperSet{j,i} =  squeeze(LF(:,:,:,(i-1)*UV_diameter+j));
+            end
+        end
+        SubAperImg = cell2mat(SubAperSet);
+    case 2
+        UV_diameter = LF_Para.UV_diameter;
+        
+        SubAperSet = cell(UV_diameter,UV_diameter);
+        for i = 1:UV_diameter
+            for j = 1:UV_diameter
+                SubAperSet{i,j} =  im2double(squeeze(LF(i,j,:,:,1:3)));
+                %SubAperSet{i,j} = LF(i:UV_diameter:end,j:UV_diameter:end,:);
+            end
+        end
+        SubAperImg = cell2mat(SubAperSet);
+        
+        % display the whole sub-aperture image
+        imshow(SubAperImg);
 end
 
-SubAperImg = cell2mat(SubAperSet);
-
-% display the whole sub-aperture image
-imshow(SubAperImg);

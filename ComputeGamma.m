@@ -6,15 +6,19 @@
 % OUTPUT:
 %      -- gamma ,
 function gamma = ComputeGamma(B, DeltaI)
-[w,h,m,~] = size(B);
-Bp = zeros(w,h,3,m);
-gamma = zeros(w,h,3);
+[w,h,c,m] = size(B.B1);
+%Bp = zeros(w,h,c,m);
+gamma = zeros(w,h,c,3);
 % compute the Moore-Prenrose pseudoinverse of B
-for i = 1:w
-    for j = 1:h
-        temp = B(i,j,:,:);
-        Bp(i,j,:,:) = pinv(temp);
-        gamma(i,j,:) = pinv(temp)*DeltaI(i,j,:);
+for k = 1:c
+    for i = 1:w
+        for j = 1:h
+            tempA = [squeeze(B.B1(i,j,k,:)) B.B2 B.B3];
+            tempB = squeeze(DeltaI(i,j,k,:));
+            %Bp(i,j,:,:) = pinv(tempA);
+            
+            gamma(i,j,k,:) = pinv(tempA)*tempB;
+        end
     end
 end
 

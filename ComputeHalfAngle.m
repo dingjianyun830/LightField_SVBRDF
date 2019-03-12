@@ -1,28 +1,33 @@
 %% Compute Half angle vector
 % This function is used to construct the Kappa array.
 % INPUT:
-%      -- s      , light source vector
-%      -- v      , viewpoint vector
-%      -- v      , viewpoint vector
+%      -- LF_Para, the parameter of the light field 
+%      -- opt   , the light direction and the view direction.
 % OUTPUT:
-%      -- H      , Half - angle vector
-function H = ComputeHalfAngle(s, v, MVImg)
+%      -- H      , Big H Vectot
+function H_vec = ComputeHalfAngle(LF_Para,opt)
 
-[w,h,m] = size(MVImg);
+% set the size of the image
+w = LF_Para.x_size;
+h = LF_Para.y_size;
 
-% compute the half-angle direction
-for k = 1:m
-    h(:,:,k) = (s+v(:,:,k))/norm(s+v(:,:,k));
-end
+% set the light and view direction
+s = opt.LightVec';
+ViewVec = opt.ViewVec;
 
 % compute the big H
-H = zeros(w,h,m,3,3);
-for k = 1:m
-    hh = h(:,:,k)*h(:,:,k);
-    vv = v(:,:,k)*v(:,:,k);
-    for i = 1:w
-        for j = 1:h
-            H(i,j,m,:,:) = (MVImg(i,j,m)-hh)*(MVImg(i,j,m)-vv);
-        end
+H_vec = zeros(w,h,3,3);
+II = eye(3); 
+for i = 1:w
+    for j = 1:h
+        % compute the half-angle direction
+        % every pixel corresponding a view direction
+        v = squeeze(ViewVec(i,j,:));
+        temp1 = s + v;
+        h_vec = temp1/norm(temp1);
+        
+        hh = h_vec*h_vec';
+        vv = v*v';
+        H_vec(i,j,:,:) = (II - hh)*(II - vv);
     end
 end
