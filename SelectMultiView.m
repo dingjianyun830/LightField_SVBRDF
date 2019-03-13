@@ -19,5 +19,5 @@ for i = 1 : h
     end
 end
 CenImg = SubAperSet{cen_y,cen_x};
-figure;
-imshow(cell2mat(MVImgSet));
+% figure;
+% imshow(cell2mat(MVImgSet));

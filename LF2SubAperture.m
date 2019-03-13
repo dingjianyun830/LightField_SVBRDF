@@ -29,6 +29,6 @@ switch LF_Para.CamType
         SubAperImg = cell2mat(SubAperSet);
         
         % display the whole sub-aperture image
-        imshow(SubAperImg);
+        %imshow(SubAperImg);
 end
 
